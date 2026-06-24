@@ -9,11 +9,14 @@ suivantes.
 """
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 
 from . import config
 
 
+@lru_cache(maxsize=None)
 def load_sensor(name: str, use_cache: bool = True) -> np.ndarray:
     """Charge la matrice d'un capteur sous forme de tableau (n_cycles, n_points).
 
@@ -42,6 +45,7 @@ def load_sensor(name: str, use_cache: bool = True) -> np.ndarray:
     return arr
 
 
+@lru_cache(maxsize=None)
 def load_profile(use_cache: bool = True) -> np.ndarray:
     """Charge le fichier des cibles ``profile.txt`` (n_cycles, 5)."""
     cache_path = config.PROCESSED_DIR / "profile.npy"

@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+# Permet `import hydraulic_valve` et `import api` depuis la racine du projet.
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-v"

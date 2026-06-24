@@ -65,6 +65,31 @@ python notebooks/build_report.py                       # construit + exécute le
 python -m nbconvert --to html --output-dir reports notebooks/rapport_valve.ipynb
 ```
 
+## Application web (API + interface)
+Architecture découplée : un backend **FastAPI** sert les prédictions, un frontend
+**Streamlit** les consomme.
+
+```bash
+# 1. Backend API (terminal 1) -> http://localhost:8000/docs
+uvicorn api.main:app --reload
+
+# 2. Interface Streamlit (terminal 2) -> http://localhost:8501
+streamlit run streamlit_app.py
+```
+L'interface propose un mode **« Local »** (appel direct du modèle) qui fonctionne
+sans démarrer l'API, pratique pour une démonstration rapide.
+
+Principaux endpoints de l'API : `GET /predict/{n}`, `GET /health`,
+`GET /model/info`, documentation interactive sur `/docs`.
+
+## Tests
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+Couvre le chargement des données, l'extraction de features (sur signaux
+synthétiques), la prédiction et les endpoints de l'API.
+
 ## Structure
 ```
 hydraulic_valve/      # package principal
@@ -75,6 +100,10 @@ hydraulic_valve/      # package principal
   evaluate.py         # évaluation sur le test final + figures
   predict.py          # prédiction à partir d'un numéro de cycle
   eda.py              # figures d'exploration
+api/main.py           # API FastAPI
+streamlit_app.py      # interface web Streamlit
+tests/                # tests unitaires (pytest)
+notebooks/            # rapport_valve.ipynb + build_report.py
 data/processed/       # cache .npy
 models/               # modèle entraîné (.joblib) + résumé
 reports/figures/      # figures (EDA, confusion, ROC, importance)
@@ -85,8 +114,8 @@ reports/figures/      # figures (EDA, confusion, ROC, importance)
 - [x] Extraction de features
 - [x] Modèle + évaluation sur le test final
 - [x] Rapport / notebook de restitution
-- [ ] Tests unitaires
-- [ ] API FastAPI + interface Streamlit (prédiction par n° de cycle)
+- [x] Tests unitaires
+- [x] API FastAPI + interface Streamlit (prédiction par n° de cycle)
 - [ ] Containerisation (Docker)
 - [ ] Versionnage modèle + dataset (DVC)
 - [ ] CI/CD (GitHub Actions)

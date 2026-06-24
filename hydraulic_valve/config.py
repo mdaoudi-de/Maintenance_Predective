@@ -11,9 +11,8 @@ from pathlib import Path
 # Racine = dossier parent du package `hydraulic_valve`.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-# Données brutes fournies (dézippées depuis data_subset.zip).
-# Le dossier d'origine du jeu de données UCI.
-RAW_DATA_DIR = PROJECT_ROOT / "condition+monitoring+of+hydraulic+systems (1)"
+# Données brutes utilisées (sous-ensemble PS2/FS1/profile), versionnées via DVC.
+RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 
 # Données intermédiaires (cache .npy pour accélérer les rechargements).
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"

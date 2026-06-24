@@ -45,7 +45,8 @@ md(r"""
 3. Modélisation et comparaison de modèles
 4. Évaluation sur l'échantillon de test final
 5. Analyse des causes (variables influentes)
-6. Limites et perspectives
+6. Validation : contrôle anti-fuite et robustesse
+7. Limites et perspectives
 """)
 
 code(r"""
@@ -236,9 +237,41 @@ code(r"""
 display(Image(filename=str(config.FIGURES_DIR / "eda_class_separation.png")))
 """)
 
-# --- 6. Limites ------------------------------------------------------------ #
+# --- 6. Validation : anti-fuite & robustesse ------------------------------- #
 md(r"""
-## 6. Limites et perspectives
+## 6. Validation : contrôle anti-fuite et robustesse
+
+Une accuracy de 100 % doit être vérifiée. Deux contrôles indépendants :
+
+**(a) Test anti-fuite (permutation).** On ré-entraîne le modèle sur des étiquettes
+*mélangées* : si la performance reste élevée, c'est qu'il y a une fuite de données ;
+si elle retombe au niveau du hasard, le modèle apprend bien un signal réel.
+""")
+
+code(r"""
+from hydraulic_valve import robustness
+res = robustness.run_all()
+display(Image(filename=str(config.FIGURES_DIR / "leakage_probe.png")))
+""")
+
+md(r"""
+Le modèle réel atteint ~1.0, mais sur **labels mélangés** il **retombe au hasard**
+(~0.5) : il n'y a donc **aucune fuite de données**. La régression logistique reste
+au-dessus de la classe majoritaire, confirmant un vrai signal discriminant.
+
+**(b) Robustesse au bruit.** On simule des capteurs bruités *à l'inférence* (le
+modèle reste entraîné sur données propres). L'accuracy reste parfaite jusqu'à
+~5 % de bruit, puis se dégrade — ce qui illustre la limite « banc d'essai
+contrôlé » et justifie le **monitoring** de la dérive en production.
+""")
+
+code(r"""
+display(Image(filename=str(config.FIGURES_DIR / "noise_robustness.png")))
+""")
+
+# --- 7. Limites ------------------------------------------------------------ #
+md(r"""
+## 7. Limites et perspectives
 
 **Limites :**
 - La performance de 100 % reflète un banc d'essai **contrôlé** ; en production

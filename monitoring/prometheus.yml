@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # Scrape les métriques exposées par l'API FastAPI (/metrics).
+  - job_name: "valve-api"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]

@@ -1,0 +1,24 @@
+# Réduit le contexte de build (l'image ne contient que le code).
+.git
+.dvc/cache
+.dvc/tmp
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Données volumineuses (fournies via volumes / dvc pull)
+condition+monitoring+of+hydraulic+systems (1)/
+data/
+
+# Sorties / docs non nécessaires au service
+reports/
+notebooks/
+tests/
+models/
+*.pdf
+*.png
+
+# Environnements virtuels
+.venv/
+venv/

@@ -50,6 +50,9 @@ python -m hydraulic_valve.train
 # 3. Évaluation sur le test final (métriques + figures dans reports/)
 python -m hydraulic_valve.evaluate
 
+# 3b. Validation : test anti-fuite (permutation) + robustesse au bruit
+python -m hydraulic_valve.robustness
+
 # 4. Prédiction pour un numéro de cycle (1-based)
 python -m hydraulic_valve.predict 2050
 ```
@@ -90,6 +93,46 @@ pytest
 Couvre le chargement des données, l'extraction de features (sur signaux
 synthétiques), la prédiction et les endpoints de l'API.
 
+## Conteneurisation (Docker)
+Tout l'environnement (API + interface + monitoring) démarre en une commande :
+```bash
+docker compose up --build
+```
+| Service | URL | Rôle |
+|---|---|---|
+| API | http://localhost:8000/docs | prédictions (FastAPI) |
+| Streamlit | http://localhost:8501 | interface web |
+| Prometheus | http://localhost:9090 | collecte des métriques |
+| Grafana | http://localhost:3001 | tableaux de bord (admin / admin) |
+
+Le modèle et les données sont montés en **volumes** (non inclus dans l'image, qui
+reste légère et reconstructible). Récupérez-les au préalable via `dvc pull` ou en
+(ré)entraînant le modèle (`python -m hydraulic_valve.train`).
+
+## Versionnage des données et du modèle (DVC)
+Le sous-ensemble de données (`data/raw`) et le modèle (`models/valve_model.joblib`)
+sont suivis par **DVC** : les pointeurs `*.dvc` sont versionnés dans git, les
+fichiers volumineux restent hors git. Le jeu de données complet d'origine (531 Mo)
+n'est pas versionné.
+```bash
+dvc remote add -d storage <url_du_stockage>   # S3, Google Drive, dossier local…
+dvc push        # envoyer données + modèle vers le stockage distant
+dvc pull        # les récupérer sur une autre machine
+```
+
+## Monitoring (Prometheus / Grafana)
+L'API expose ses métriques sur `/metrics` : latence, nombre de requêtes, et un
+compteur `valve_predictions_total` par classe (optimale / non optimale).
+Prometheus les collecte ; Grafana les affiche via un tableau de bord
+pré-provisionné (« Maintenance prédictive — Condition de la valve »). L'ensemble
+est lancé par `docker compose up`.
+
+## Intégration continue (CI/CD)
+Workflow GitHub Actions [`.github/workflows/ci.yml`](.github/workflows/ci.yml) :
+à chaque push / pull request sur `main`, exécution du lint (ruff) puis des tests
+(pytest), suivie du build de l'image Docker. Les tests dépendant des données ou
+du modèle sont ignorés proprement en CI (artefacts gérés par DVC).
+
 ## Structure
 ```
 hydraulic_valve/      # package principal
@@ -100,12 +143,18 @@ hydraulic_valve/      # package principal
   evaluate.py         # évaluation sur le test final + figures
   predict.py          # prédiction à partir d'un numéro de cycle
   eda.py              # figures d'exploration
-api/main.py           # API FastAPI
+  robustness.py       # contrôle anti-fuite + robustesse au bruit
+api/main.py           # API FastAPI (+ métriques Prometheus)
 streamlit_app.py      # interface web Streamlit
 tests/                # tests unitaires (pytest)
 notebooks/            # rapport_valve.ipynb + build_report.py
-data/processed/       # cache .npy
-models/               # modèle entraîné (.joblib) + résumé
+monitoring/           # prometheus.yml + provisioning & dashboard Grafana
+.github/workflows/    # CI/CD (GitHub Actions)
+Dockerfile            # image de service
+docker-compose.yml    # API + Streamlit + Prometheus + Grafana
+data/raw.dvc          # pointeur DVC du dataset (data/raw versionné par DVC)
+data/processed/       # cache .npy (local)
+models/               # modèle entraîné (.joblib, versionné DVC) + résumé
 reports/figures/      # figures (EDA, confusion, ROC, importance)
 ```
 
@@ -116,8 +165,8 @@ reports/figures/      # figures (EDA, confusion, ROC, importance)
 - [x] Rapport / notebook de restitution
 - [x] Tests unitaires
 - [x] API FastAPI + interface Streamlit (prédiction par n° de cycle)
-- [ ] Containerisation (Docker)
-- [ ] Versionnage modèle + dataset (DVC)
-- [ ] CI/CD (GitHub Actions)
-- [ ] Monitoring (Prometheus / Grafana)
+- [x] Containerisation (Docker)
+- [x] Versionnage modèle + dataset (DVC)
+- [x] CI/CD (GitHub Actions)
+- [x] Monitoring (Prometheus / Grafana)
 # Maintenance_Predective

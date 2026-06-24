@@ -1,0 +1,5 @@
+outs:
+- md5: ec4f53d15df80e16ddb3336e5d789e9b
+  size: 1532032
+  hash: md5
+  path: valve_model.joblib

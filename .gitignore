@@ -5,7 +5,11 @@ __pycache__/
 venv/
 *.egg-info/
 
-# Données & artefacts (versionnés via DVC ultérieurement)
+# Jeu de données complet d'origine (531 Mo, non versionné — seul le sous-ensemble
+# data/raw est suivi par DVC)
+condition+monitoring+of+hydraulic+systems (1)/
+
+# Données & artefacts (cache local ; data/raw et le modèle sont versionnés via DVC)
 data/processed/
 models/*.joblib
 

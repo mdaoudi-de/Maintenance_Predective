@@ -17,6 +17,23 @@ app = FastAPI(
     version=__version__,
 )
 
+# --- Monitoring Prometheus (optionnel) -------------------------------------
+# Expose /metrics (latence, nb de requêtes…) + un compteur de prédictions par
+# classe. Désactivé proprement si les libs de monitoring sont absentes.
+try:
+    from prometheus_client import Counter
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+    PREDICTIONS_TOTAL = Counter(
+        "valve_predictions_total",
+        "Nombre de prédictions par résultat",
+        ["result"],
+    )
+    _MONITORING = True
+except Exception:  # pragma: no cover
+    PREDICTIONS_TOTAL = None
+    _MONITORING = False
+
 
 class PredictionResponse(BaseModel):
     """Réponse de prédiction pour un cycle."""
@@ -67,6 +84,10 @@ def predict_cycle(cycle_number: int) -> PredictionResponse:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except FileNotFoundError as exc:  # modèle non entraîné
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    if PREDICTIONS_TOTAL is not None:
+        label = "optimal" if result["prediction"] == 1 else "non_optimal"
+        PREDICTIONS_TOTAL.labels(result=label).inc()
     return PredictionResponse(**result)
 
 
@@ -80,3 +101,8 @@ def model_info() -> dict:
     meta = dict(bundle["metadata"])
     meta["n_cycles_total"] = int(len(data.get_target()))
     return meta
+
+
+# Expose les métriques Prometheus sur /metrics (après définition des routes).
+if _MONITORING:
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)

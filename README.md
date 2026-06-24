@@ -21,6 +21,7 @@ Projet basé sur le jeu de données *Condition monitoring of hydraulic systems*
 3. **Comparaison de modèles** (régression logistique, Random Forest, Histogram
    Gradient Boosting) par validation croisée stratifiée sur l'entraînement.
 4. **Évaluation** du meilleur modèle sur le test final (jamais vu).
+5. **Validation** : contrôle anti-fuite (test de permutation) et robustesse au bruit.
 
 ## Résultats (test final, 205 cycles)
 | Métrique | Valeur |
@@ -32,6 +33,12 @@ Projet basé sur le jeu de données *Condition monitoring of hydraulic systems*
 Classification parfaite, cohérente avec la littérature (la valve est une cible
 « facile »). Les variables les plus discriminantes sont la **forme du signal de
 pression PS2** (skew, kurtosis) et son contenu spectral.
+
+**Résultat validé** (section 6 du rapport) : **aucune fuite de données** — avec
+des étiquettes mélangées, l'accuracy retombe au hasard (~0,5). La pression PS2
+seule suffit déjà à atteindre 100 %, ce qui explique la performance. Le modèle
+reste robuste jusqu'à ~5 % de bruit capteur puis se dégrade — d'où l'intérêt du
+**monitoring** de la dérive en production.
 
 ## Installation
 ```bash
@@ -79,8 +86,11 @@ uvicorn api.main:app --reload
 # 2. Interface Streamlit (terminal 2) -> http://localhost:8501
 streamlit run streamlit_app.py
 ```
-L'interface propose un mode **« Local »** (appel direct du modèle) qui fonctionne
-sans démarrer l'API, pratique pour une démonstration rapide.
+L'interface est **guidée** : aide intégrée sur le numéro de cycle, **boutons
+d'exemples** (valve optimale / dégradée / cycle de test au hasard), affichage de
+la **valeur réelle** du cycle (comparaison prédiction vs réalité) et **aperçu des
+signaux** PS2/FS1. Elle propose aussi un mode **« Local »** (appel direct du
+modèle) qui fonctionne sans démarrer l'API.
 
 Principaux endpoints de l'API : `GET /predict/{n}`, `GET /health`,
 `GET /model/info`, documentation interactive sur `/docs`.
@@ -155,7 +165,7 @@ docker-compose.yml    # API + Streamlit + Prometheus + Grafana
 data/raw.dvc          # pointeur DVC du dataset (data/raw versionné par DVC)
 data/processed/       # cache .npy (local)
 models/               # modèle entraîné (.joblib, versionné DVC) + résumé
-reports/figures/      # figures (EDA, confusion, ROC, importance)
+reports/figures/      # figures (EDA, confusion, ROC, importance, validation)
 ```
 
 ## Feuille de route

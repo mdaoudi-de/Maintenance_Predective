@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Données & artefacts (versionnés via DVC ultérieurement)
+data/processed/
+models/*.joblib
+
+# Cache outils
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS
+Thumbs.db
+.DS_Store

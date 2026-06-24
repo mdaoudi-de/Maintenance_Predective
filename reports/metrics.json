@@ -1,0 +1,44 @@
+{
+  "model_name": "random_forest",
+  "n_test": 205,
+  "accuracy": 1.0,
+  "balanced_accuracy": 1.0,
+  "roc_auc": 1.0,
+  "classification_report": {
+    "Non optimale": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 132.0
+    },
+    "Optimale": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 73.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 205.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 205.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      132,
+      0
+    ],
+    [
+      0,
+      73
+    ]
+  ]
+}

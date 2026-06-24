@@ -1,0 +1,7 @@
+# Dépendances de développement (génération du rapport, tests à venir)
+-r requirements.txt
+nbformat>=5.10
+nbclient>=0.10
+ipykernel>=6.29
+nbconvert>=7.16
+pytest>=8.0
